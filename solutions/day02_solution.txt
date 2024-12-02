@@ -1,0 +1,2 @@
+Solution for Task 1 of Day 02:
+The total number of safe reports is 591.
