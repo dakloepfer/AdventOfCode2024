@@ -1,4 +1,13 @@
 pub fn run() {
-    // Your solution for Day 1
-    println!("Hello from Day 1!");
+    task1();
+    task2();
+
+    println!("Completed solutions for Day 1!");
+}
+
+fn task1() {
+    println!("Computing solution for task 1 of Day 1...")
+}
+fn task2() {
+    println!("Computing solution for task 2 of Day 1...")
 }
