@@ -13,7 +13,7 @@ fn task1() -> Result<(), Error> {
     println!("Computing solution for task 1 of Day 1...");
 
     let input_data = fs::read_to_string(
-        "/Users/dominik.kloepfer/Documents/advent-of-code-2024/input_data/day01task1_input.txt",
+        "/Users/dominik.kloepfer/Documents/advent-of-code-2024/input_data/day01_input.txt",
     )?;
 
     let mut list_a: Vec<i32> = Vec::new();
