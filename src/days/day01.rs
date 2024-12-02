@@ -43,7 +43,7 @@ fn task1() -> Result<(Vec<i32>, Vec<i32>), Error> {
     writeln!(solution_file, "Solution for Task 1 of Day 01:")?;
     writeln!(
         solution_file,
-        "The total distance between the two lists is {}",
+        "The total distance between the two lists is {}.",
         distance
     )?;
 
@@ -100,7 +100,7 @@ fn task2(list_a: Vec<i32>, list_b: Vec<i32>) -> Result<(), Error> {
     writeln!(solution_file, "Solution for Task 2 of Day 01:")?;
     writeln!(
         solution_file,
-        "The total similarity score between the two lists is {}",
+        "The total similarity score between the two lists is {}.",
         similarity_score
     )?;
 
