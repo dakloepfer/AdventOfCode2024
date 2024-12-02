@@ -20,10 +20,13 @@ fn main() {
     }
 
     for day in days_to_run {
-        match day {
+        let _ = match day {
             1 => day01::run(),
             // Add more days here
-            _ => eprintln!("Day {} not implemented", day),
-        }
+            _ => Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!("Day {} not implemented", day),
+            )),
+        };
     }
 }

@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 01:
+The total distance between the two lists is 1889772
+
+Solution for Task 2 of Day 01:
+The total similarity score between the two lists is 23228917

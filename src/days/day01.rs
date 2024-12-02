@@ -2,14 +2,16 @@ use std::fs;
 use std::io::Error;
 use std::io::Write;
 
-pub fn run() {
-    let _ = task1();
-    task2();
+pub fn run() -> Result<(), Error> {
+    let (list_a, list_b) = task1()?;
+    let _ = task2(list_a, list_b);
 
     println!("Completed solutions for Day 1!");
+
+    Ok(())
 }
 
-fn task1() -> Result<(), Error> {
+fn task1() -> Result<(Vec<i32>, Vec<i32>), Error> {
     println!("Computing solution for task 1 of Day 1...");
 
     let input_data = fs::read_to_string(
@@ -37,16 +39,70 @@ fn task1() -> Result<(), Error> {
         distance += (item_a - item_b).unsigned_abs();
     }
 
-    let mut solution_file = fs::File::create("solutions/day01_task1_solution.txt")?;
+    let mut solution_file = fs::File::create("solutions/day01_solution.txt")?;
+    writeln!(solution_file, "Solution for Task 1 of Day 01:")?;
     writeln!(
         solution_file,
         "The total distance between the two lists is {}",
         distance
     )?;
 
-    Ok(())
+    Ok((list_a, list_b))
 }
 
-fn task2() {
-    println!("Computing solution for task 2 of Day 1...")
+/// list_a and list_b are assumed to be sorted already.
+fn task2(list_a: Vec<i32>, list_b: Vec<i32>) -> Result<(), Error> {
+    println!("Computing solution for task 2 of Day 1...");
+
+    let mut num_appearances: Vec<u32> = vec![0; list_a.len()];
+
+    let mut list_a_index: usize = 0;
+    let mut list_b_index: usize = 0;
+    while list_b_index < list_b.len() {
+        let list_a_element = list_a[list_a_index];
+        let list_b_element = list_b[list_b_index];
+
+        match list_b_element {
+            belem if belem < list_a_element => {
+                list_b_index += 1;
+            }
+            belem if belem == list_a_element => {
+                num_appearances[list_a_index] += 1;
+                list_b_index += 1;
+            }
+            belem if belem > list_a_element => {
+                if list_a_index < list_a.len() - 1 {
+                    list_a_index += 1;
+                } else {
+                    break;
+                }
+                // copy num_appearances
+                if list_a[list_a_index] == list_a_element {
+                    num_appearances[list_a_index] = num_appearances[list_a_index - 1];
+                }
+            }
+            _ => {
+                eprintln!("What is going on? This is unexpected.")
+            }
+        }
+    }
+
+    let mut similarity_score: i32 = 0;
+    for (list_a_element, num_apps) in list_a.iter().zip(num_appearances.iter()) {
+        similarity_score += list_a_element * (*num_apps as i32);
+    }
+
+    let mut solution_file = fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open("solutions/day01_solution.txt")?;
+    writeln!(solution_file)?;
+    writeln!(solution_file, "Solution for Task 2 of Day 01:")?;
+    writeln!(
+        solution_file,
+        "The total similarity score between the two lists is {}",
+        similarity_score
+    )?;
+
+    Ok(())
 }
