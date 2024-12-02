@@ -1,2 +1,5 @@
 Solution for Task 1 of Day 02:
 The total number of safe reports is 591.
+
+Solution for Task 2 of Day 02:
+The total number of safe reports taking into account the problem dampener is 621.
