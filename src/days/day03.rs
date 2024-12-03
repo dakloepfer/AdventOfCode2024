@@ -145,7 +145,7 @@ impl ProgramCleaner {
                     1 => 'o',
                     2 => '(',
                     3 =>  ')',
-                    _ => panic!("current_mul_command has length longer than 3 in state 1, this shouldn't be possible"),
+                    _ => panic!("current_conditional has length longer than 3 in state 4, this shouldn't be possible"),
                 };
 
                 if el == expected_next_char {
@@ -167,7 +167,7 @@ impl ProgramCleaner {
                     4 =>  't',
                     5 =>  '(',
                     6 =>  ')',
-                    _ => panic!("current_mul_command has length longer than 3 in state 1, this shouldn't be possible"),
+                    _ => panic!("current_conditional has length longer than 6 in state 5, this shouldn't be possible"),
                 };
 
                 if el == expected_next_char {
