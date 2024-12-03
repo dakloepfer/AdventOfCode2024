@@ -1,7 +1,8 @@
 mod days;
 
-use days::day01; // Add more days as needed
-use days::day02; // Add more days as needed
+use days::day01;
+use days::day02;
+use days::day03; // Add more days as needed
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -24,6 +25,7 @@ fn main() {
         let _ = match day {
             1 => day01::run(),
             2 => day02::run(),
+            3 => day03::run(),
             // Add more days here
             _ => Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
