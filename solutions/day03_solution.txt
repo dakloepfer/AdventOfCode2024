@@ -1,0 +1,2 @@
+Solution for Task 1 of Day 03:
+The output of the cleaned program is 166357705.
