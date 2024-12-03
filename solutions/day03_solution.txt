@@ -1,2 +1,5 @@
 Solution for Task 1 of Day 03:
 The output of the cleaned program is 166357705.
+
+Solution for Task 2 of Day 03:
+The output of the cleaned program taking into account the conditionals is 88811886.
