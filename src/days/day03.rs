@@ -52,9 +52,18 @@ fn task2() -> Result<(), Error> {
     Ok(())
 }
 
+#[derive(PartialEq)]
+enum LookingFor {
+    Mul,
+    FirstNum,
+    SecondNum,
+    Do,
+    Dont,
+}
+
 struct ProgramCleaner {
     running_sum: i32,
-    current_state: u32, // 1 for looking for mul, 2 for first number, 3 for second number, 4 for looking for do(), 5 for looking for don't()
+    current_state: LookingFor, // which type / part of command to look for
     current_mul_command: Vec<char>,
     current_first_number: Vec<char>,
     current_second_number: Vec<char>,
@@ -64,7 +73,7 @@ struct ProgramCleaner {
 
 impl ProgramCleaner {
     fn reset(&mut self) -> Result<(), Error> {
-        self.current_state = 1;
+        self.current_state = LookingFor::Mul;
         self.current_mul_command = Vec::new();
         self.current_first_number = Vec::new();
         self.current_second_number = Vec::new();
@@ -82,13 +91,13 @@ impl ProgramCleaner {
             if el == 'd' && enable_conditionals {
                 let _ = self.reset();
                 if self.mul_enabled {
-                    self.current_state = 5; // check if we get a disabler
+                    self.current_state = LookingFor::Dont; // check if we get a disabler
                 } else {
-                    self.current_state = 4;
+                    self.current_state = LookingFor::Do;
                 }
             }
-            if self.current_state == 1 || (el == 'm' && self.mul_enabled) {
-                self.current_state = 1; // in case we were in state 4 or 5
+            if self.current_state == LookingFor::Mul || (el == 'm' && self.mul_enabled) {
+                self.current_state = LookingFor::Mul; // in case we were in state 4 or 5
 
                 let expected_next_char: char = match self.current_mul_command.len() {
                     0 => 'm',
@@ -104,17 +113,17 @@ impl ProgramCleaner {
                 }
                 if self.current_mul_command.len() == 4 {
                     // completed mul command
-                    self.current_state = 2;
+                    self.current_state = LookingFor::FirstNum;
                 }
-            } else if self.current_state == 2 {
+            } else if self.current_state == LookingFor::FirstNum {
                 if (self.current_first_number.is_empty() && el == '-') || el.is_numeric() {
                     self.current_first_number.push(el);
                 } else if el == ',' {
-                    self.current_state = 3;
+                    self.current_state = LookingFor::SecondNum;
                 } else {
                     let _ = self.reset();
                 }
-            } else if self.current_state == 3 {
+            } else if self.current_state == LookingFor::SecondNum {
                 if (self.current_second_number.is_empty() && el == '-') || el.is_numeric() {
                     self.current_second_number.push(el);
                 } else if el == ')' && self.mul_enabled {
@@ -135,7 +144,7 @@ impl ProgramCleaner {
                 } else {
                     let _ = self.reset();
                 }
-            } else if self.current_state == 4 {
+            } else if self.current_state == LookingFor::Do {
                 let expected_next_char: char = match self.current_conditional.len() {
                     0 => 'd',
                     1 => 'o',
@@ -154,7 +163,7 @@ impl ProgramCleaner {
                     self.mul_enabled = true;
                     let _ = self.reset();
                 }
-            } else if self.current_state == 5 {
+            } else if self.current_state == LookingFor::Dont {
                 let expected_next_char: char = match self.current_conditional.len() {
                     0 => 'd',
                     1 => 'o',
@@ -185,7 +194,7 @@ impl ProgramCleaner {
     pub fn new() -> ProgramCleaner {
         ProgramCleaner {
             running_sum: 0,
-            current_state: 1,
+            current_state: LookingFor::Mul,
             current_mul_command: Vec::new(),
             current_first_number: Vec::new(),
             current_second_number: Vec::new(),
