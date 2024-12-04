@@ -14,9 +14,7 @@ pub fn run() -> Result<(), Error> {
 fn task1() -> Result<(), Error> {
     println!("Computing solution for task 1 of Day 3...");
 
-    let input_data = fs::read_to_string(
-        "/Users/dominik.kloepfer/Documents/advent-of-code-2024/input_data/day03_input.txt",
-    )?;
+    let input_data = fs::read_to_string("input_data/day03_input.txt")?;
     let mut program_cleaner = ProgramCleaner::new();
 
     let program_solution = program_cleaner.compute_sum_of_muls(input_data, false)?;
@@ -35,9 +33,7 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 3...");
 
-    let input_data = fs::read_to_string(
-        "/Users/dominik.kloepfer/Documents/advent-of-code-2024/input_data/day03_input.txt",
-    )?;
+    let input_data = fs::read_to_string("input_data/day03_input.txt")?;
     let mut program_cleaner = ProgramCleaner::new();
 
     let program_solution = program_cleaner.compute_sum_of_muls(input_data, true)?;

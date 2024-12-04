@@ -51,9 +51,7 @@ fn check_safe(levels: Vec<i32>) -> Result<bool, Error> {
 fn task1() -> Result<(), Error> {
     println!("Computing solution for task 1 of Day 2...");
 
-    let input_data = fs::read_to_string(
-        "/Users/dominik.kloepfer/Documents/advent-of-code-2024/input_data/day02_input.txt",
-    )?;
+    let input_data = fs::read_to_string("input_data/day02_input.txt")?;
 
     let mut num_safe: u32 = 0;
     for report in input_data.lines() {
@@ -81,9 +79,7 @@ fn task1() -> Result<(), Error> {
 
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 2...");
-    let input_data = fs::read_to_string(
-        "/Users/dominik.kloepfer/Documents/advent-of-code-2024/input_data/day02_input.txt",
-    )?;
+    let input_data = fs::read_to_string("input_data/day02_input.txt")?;
 
     let mut num_safe: u32 = 0;
     for report in input_data.lines() {
