@@ -1,2 +1,5 @@
 Solution for Task 1 of Day 04:
 The word search contains 2397 instances of XMAS.
+
+Solution for Task 2 of Day 04:
+The word search contains 1824 X-MASes.

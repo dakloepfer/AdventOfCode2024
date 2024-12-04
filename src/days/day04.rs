@@ -170,5 +170,38 @@ fn task1() -> Result<(), Error> {
 }
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 4...");
+
+    let input_data = fs::read_to_string("input_data/day04_input.txt")?;
+    let grid: Vec<Vec<char>> = input_data
+        .lines()
+        .map(|line| line.chars().collect())
+        .collect();
+
+    let mut num_words: u32 = 0;
+    for (row, line) in grid.iter().enumerate().skip(1).take(grid.len() - 2) {
+        for (col, ch) in line.iter().enumerate().skip(1).take(line.len() - 2) {
+            if (*ch == 'A')
+                & ((((grid[row - 1][col - 1] == 'M') & (grid[row + 1][col + 1] == 'S'))
+                    || ((grid[row - 1][col - 1] == 'S') & (grid[row + 1][col + 1] == 'M')))
+                    & (((grid[row - 1][col + 1] == 'M') & (grid[row + 1][col - 1] == 'S'))
+                        || ((grid[row - 1][col + 1] == 'S') & (grid[row + 1][col - 1] == 'M'))))
+            {
+                num_words += 1;
+            }
+        }
+    }
+
+    let mut solution_file = fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open("solutions/day04_solution.txt")?;
+    writeln!(solution_file)?;
+    writeln!(solution_file, "Solution for Task 2 of Day 04:")?;
+    writeln!(
+        solution_file,
+        "The word search contains {} X-MASes.",
+        num_words
+    )?;
+
     Ok(())
 }
