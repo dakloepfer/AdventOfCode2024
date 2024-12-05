@@ -14,7 +14,10 @@ pub fn run() -> Result<(), Error> {
     Ok(())
 }
 
-fn task1() -> Result<(HashMap<u32, HashSet<u32>>, Vec<Vec<u32>>), Error> {
+type RuleSet = HashMap<u32, HashSet<u32>>;
+type UpdateList = Vec<Vec<u32>>;
+
+fn task1() -> Result<(RuleSet, UpdateList), Error> {
     println!("Computing solution for task 1 of Day 5...");
 
     let input_data = fs::read_to_string("input_data/day05_input.txt")?;
@@ -181,10 +184,7 @@ impl Dag {
     }
 }
 
-fn task2(
-    before_than: HashMap<u32, HashSet<u32>>,
-    invalid_updates: Vec<Vec<u32>>,
-) -> Result<(), Error> {
+fn task2(before_than: RuleSet, invalid_updates: UpdateList) -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 5...");
 
     let mut sum_of_middle_pages: u32 = 0;
