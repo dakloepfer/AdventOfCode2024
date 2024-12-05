@@ -1,0 +1,2 @@
+Solution for Task 1 of Day 05:
+The sum of the middle page numbers of all valid updates is 6034.
