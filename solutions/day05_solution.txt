@@ -1,2 +1,5 @@
 Solution for Task 1 of Day 05:
 The sum of the middle page numbers of all valid updates is 6034.
+
+Solution for Task 2 of Day 05:
+The sum of the middle page numbers of all repaired invalid updates is 6305.
