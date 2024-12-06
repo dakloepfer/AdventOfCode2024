@@ -1,0 +1,6 @@
+
+Solution for Task 2 of Day 06:
+The guard visits 5453 unique locations before exiting.
+
+Solution for Task 2 of Day 06:
+TODO 0.
