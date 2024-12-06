@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use std::fs;
+use std::hash::Hash;
 use std::io::Error;
 use std::io::Write;
 
@@ -13,7 +14,7 @@ pub fn run() -> Result<(), Error> {
     Ok(())
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Direction {
     Up,
     Right,
@@ -21,10 +22,16 @@ enum Direction {
     Left,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 struct Location {
     row: usize,
     col: usize,
+}
+
+#[derive(PartialEq, Eq, Hash)]
+struct GuardState {
+    location: Location,
+    direction: Direction,
 }
 
 struct Map {
@@ -84,15 +91,20 @@ impl Map {
 }
 
 fn walk_guard(
-    map: Map,
+    map: &Map,
     mut guard_location: Location,
     mut guard_direction: Direction,
-) -> Result<usize, Error> {
+) -> Result<(bool, HashSet<Location>), Error> {
     let mut visited_locations: HashSet<Location> = HashSet::new();
+    let mut visited_states: HashSet<GuardState> = HashSet::new();
+    let mut has_loop = false;
 
     'walking_loop: loop {
         visited_locations.insert(guard_location);
-
+        visited_states.insert(GuardState {
+            location: guard_location,
+            direction: guard_direction,
+        });
         match guard_direction {
             Direction::Up => {
                 if guard_location.row == 0 {
@@ -143,10 +155,16 @@ fn walk_guard(
                     guard_direction = Direction::Down;
                 }
             }
+        } else if visited_states.contains(&GuardState {
+            location: guard_location,
+            direction: guard_direction,
+        }) {
+            has_loop = true;
+            break 'walking_loop;
         }
     }
 
-    Ok(visited_locations.len())
+    Ok((has_loop, visited_locations))
 }
 
 fn task1() -> Result<(), Error> {
@@ -156,7 +174,7 @@ fn task1() -> Result<(), Error> {
 
     // guard location is row, col
     let (map, guard_location, guard_direction) = Map::from_string(input_data)?;
-    let num_visited_locations = walk_guard(map, guard_location, guard_direction)?;
+    let (_, visited_locations) = walk_guard(&map, guard_location, guard_direction)?;
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -167,7 +185,7 @@ fn task1() -> Result<(), Error> {
     writeln!(
         solution_file,
         "The guard visits {} unique locations before exiting.",
-        num_visited_locations
+        visited_locations.len()
     )?;
 
     Ok(())
@@ -176,7 +194,23 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 6...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day06_input.txt")?;
+
+    // guard location is row, col
+    let (mut map, guard_location, guard_direction) = Map::from_string(input_data)?;
+    let (_, original_visited_locations) = walk_guard(&map, guard_location, guard_direction)?;
+
+    // just add an obstacle and see if there is a loop
+    let mut num_loop_locations: u32 = 0;
+    for new_obstacle_location in original_visited_locations {
+        map.barriers.insert(new_obstacle_location);
+        let (has_loop, _) = walk_guard(&map, guard_location, guard_direction)?;
+        map.barriers.remove(&new_obstacle_location);
+
+        if has_loop {
+            num_loop_locations += 1;
+        }
+    }
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -184,7 +218,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day06_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 06:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "There are {} locations where adding an obstacle would create a loop.",
+        num_loop_locations
+    )?;
 
     Ok(())
 }
