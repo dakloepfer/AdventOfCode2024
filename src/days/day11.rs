@@ -18,12 +18,8 @@ fn task1() -> Result<(), Error> {
 
     let solution = 0;
 
-    let mut solution_file = fs::OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open("solutions/day11_solution.txt")?;
-    writeln!(solution_file)?;
-    writeln!(solution_file, "Solution for Task 2 of Day 11:")?;
+    let mut solution_file = fs::File::create("solutions/day11_solution.txt")?;
+    writeln!(solution_file, "Solution for Task 1 of Day 11:")?;
     writeln!(solution_file, "TODO {}.", solution)?;
 
     Ok(())

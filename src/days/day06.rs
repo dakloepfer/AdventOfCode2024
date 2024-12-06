@@ -176,12 +176,8 @@ fn task1() -> Result<(), Error> {
     let (map, guard_location, guard_direction) = Map::from_string(input_data)?;
     let (_, visited_locations) = walk_guard(&map, guard_location, guard_direction)?;
 
-    let mut solution_file = fs::OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open("solutions/day06_solution.txt")?;
-    writeln!(solution_file)?;
-    writeln!(solution_file, "Solution for Task 2 of Day 06:")?;
+    let mut solution_file = fs::File::create("solutions/day04_solution.txt")?;
+    writeln!(solution_file, "Solution for Task 1 of Day 06:")?;
     writeln!(
         solution_file,
         "The guard visits {} unique locations before exiting.",
