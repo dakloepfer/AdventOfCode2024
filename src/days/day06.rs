@@ -1,5 +1,4 @@
-use std::collections::hash_map::Entry;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use std::fs;
 use std::io::Error;
@@ -14,7 +13,7 @@ pub fn run() -> Result<(), Error> {
     Ok(())
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 enum Direction {
     Up,
     Right,
@@ -22,23 +21,21 @@ enum Direction {
     Left,
 }
 
-#[derive(Debug)]
-struct GuardLocation {
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+struct Location {
     row: usize,
     col: usize,
 }
 
 struct Map {
-    barriers_per_row: HashMap<usize, HashSet<usize>>, // for all the rows containing barriers, give the (sorted) columns the barriers exist at
-    barriers_per_col: HashMap<usize, HashSet<usize>>, // for all the cols containing barriers, give the (sorted) rows the barriers exist at
+    barriers: HashSet<Location>,
     height: usize,
     width: usize,
 }
 impl Map {
-    pub fn from_string(input_data: String) -> Result<(Map, GuardLocation, Direction), Error> {
-        let mut barriers_per_row = HashMap::new();
-        let mut barriers_per_col = HashMap::new();
-        let mut guard_location = GuardLocation { row: 0, col: 0 };
+    pub fn from_string(input_data: String) -> Result<(Map, Location, Direction), Error> {
+        let mut barriers = HashSet::new();
+        let mut guard_location = Location { row: 0, col: 0 };
         let mut guard_direction: Direction = Direction::Up;
 
         let mut height = 0;
@@ -49,31 +46,22 @@ impl Map {
                 width = col;
                 match val {
                     '#' => {
-                        if let Entry::Vacant(e) = barriers_per_row.entry(row) {
-                            e.insert(HashSet::from([col]));
-                        } else {
-                            barriers_per_row.get_mut(&row).unwrap().insert(col);
-                        }
-                        if let Entry::Vacant(e) = barriers_per_col.entry(col) {
-                            e.insert(HashSet::from([row]));
-                        } else {
-                            barriers_per_col.get_mut(&col).unwrap().insert(row);
-                        }
+                        barriers.insert(Location { row, col });
                     }
                     '^' => {
-                        guard_location = GuardLocation { row, col };
+                        guard_location = Location { row, col };
                         guard_direction = Direction::Up;
                     }
                     '>' => {
-                        guard_location = GuardLocation { row, col };
+                        guard_location = Location { row, col };
                         guard_direction = Direction::Right;
                     }
                     'v' => {
-                        guard_location = GuardLocation { row, col };
+                        guard_location = Location { row, col };
                         guard_direction = Direction::Down;
                     }
                     '<' => {
-                        guard_location = GuardLocation { row, col };
+                        guard_location = Location { row, col };
                         guard_direction = Direction::Left;
                     }
                     _ => {}
@@ -85,8 +73,7 @@ impl Map {
 
         Ok((
             Map {
-                barriers_per_row,
-                barriers_per_col,
+                barriers,
                 height,
                 width,
             },
@@ -96,120 +83,80 @@ impl Map {
     }
 }
 
+fn walk_guard(
+    map: Map,
+    mut guard_location: Location,
+    mut guard_direction: Direction,
+) -> Result<usize, Error> {
+    let mut visited_locations: HashSet<Location> = HashSet::new();
+
+    'walking_loop: loop {
+        visited_locations.insert(guard_location);
+
+        match guard_direction {
+            Direction::Up => {
+                if guard_location.row == 0 {
+                    break 'walking_loop;
+                } else {
+                    guard_location.row -= 1;
+                }
+            }
+            Direction::Down => {
+                if guard_location.row == map.height - 1 {
+                    break 'walking_loop;
+                } else {
+                    guard_location.row += 1;
+                }
+            }
+            Direction::Left => {
+                if guard_location.col == 0 {
+                    break 'walking_loop;
+                } else {
+                    guard_location.col -= 1;
+                }
+            }
+            Direction::Right => {
+                if guard_location.col == map.width - 1 {
+                    break 'walking_loop;
+                } else {
+                    guard_location.col += 1;
+                }
+            }
+        }
+
+        if map.barriers.contains(&guard_location) {
+            match guard_direction {
+                Direction::Up => {
+                    guard_location.row += 1;
+                    guard_direction = Direction::Right;
+                }
+                Direction::Down => {
+                    guard_location.row -= 1;
+                    guard_direction = Direction::Left;
+                }
+                Direction::Left => {
+                    guard_location.col += 1;
+                    guard_direction = Direction::Up;
+                }
+                Direction::Right => {
+                    guard_location.col -= 1;
+                    guard_direction = Direction::Down;
+                }
+            }
+        }
+    }
+
+    Ok(visited_locations.len())
+}
+
 fn task1() -> Result<(), Error> {
     println!("Computing solution for task 1 of Day 6...");
 
     let input_data = fs::read_to_string("input_data/day06_input.txt")?;
 
     // guard location is row, col
-    let (map, mut guard_location, mut guard_direction) = Map::from_string(input_data)?;
-    let mut visited_locations: HashSet<(usize, usize)> = HashSet::new();
-    'walking_loop: loop {
-        match guard_direction {
-            Direction::Up => {
-                if let Some(barrier_rows) = map.barriers_per_col.get(&guard_location.col) {
-                    let mut row = guard_location.row;
-                    if row == 0 {
-                        break 'walking_loop;
-                    }
-                    loop {
-                        if barrier_rows.contains(&row) {
-                            guard_location.row = row + 1;
-                            guard_direction = Direction::Right;
-                            break;
-                        }
-                        visited_locations.insert((row, guard_location.col));
-                        if row == 0 {
-                            break 'walking_loop;
-                        }
-                        row -= 1;
-                    }
-                } else {
-                    for row in 0..guard_location.row {
-                        visited_locations.insert((row, guard_location.col));
-                    }
-                    break 'walking_loop;
-                }
-            }
-            Direction::Down => {
-                if let Some(barrier_rows) = map.barriers_per_col.get(&guard_location.col) {
-                    let mut row = guard_location.row;
-                    if row == map.height - 1 {
-                        break 'walking_loop;
-                    }
-                    loop {
-                        if barrier_rows.contains(&row) {
-                            guard_location.row = row - 1;
-                            guard_direction = Direction::Left;
-                            break;
-                        }
-                        visited_locations.insert((row, guard_location.col));
-                        if row == map.height - 1 {
-                            break 'walking_loop;
-                        }
-                        row += 1;
-                    }
-                } else {
-                    for row in guard_location.row..map.height {
-                        visited_locations.insert((row, guard_location.col));
-                    }
-                    break 'walking_loop;
-                }
-            }
-            Direction::Left => {
-                if let Some(barrier_cols) = map.barriers_per_row.get(&guard_location.row) {
-                    let mut col = guard_location.col;
-                    if col == 0 {
-                        break 'walking_loop;
-                    }
-                    loop {
-                        if barrier_cols.contains(&col) {
-                            guard_location.col = col + 1;
-                            guard_direction = Direction::Up;
-                            break;
-                        }
-                        visited_locations.insert((guard_location.row, col));
-                        if col == 0 {
-                            break 'walking_loop;
-                        }
-                        col -= 1;
-                    }
-                } else {
-                    for col in 0..guard_location.col {
-                        visited_locations.insert((guard_location.row, col));
-                    }
-                    break 'walking_loop;
-                }
-            }
-            Direction::Right => {
-                if let Some(barrier_cols) = map.barriers_per_row.get(&guard_location.row) {
-                    let mut col = guard_location.col;
-                    if col == map.width - 1 {
-                        break 'walking_loop;
-                    }
-                    loop {
-                        if barrier_cols.contains(&col) {
-                            guard_location.col = col - 1;
-                            guard_direction = Direction::Down;
-                            break;
-                        }
-                        visited_locations.insert((guard_location.row, col));
-                        if col == map.width - 1 {
-                            break 'walking_loop;
-                        }
-                        col += 1;
-                    }
-                } else {
-                    for col in guard_location.col..map.width {
-                        visited_locations.insert((guard_location.row, col));
-                    }
-                    break 'walking_loop;
-                }
-            }
-        }
-    }
-
-    let num_visited_locations = visited_locations.len();
+    let (map, guard_location, guard_direction) = Map::from_string(input_data)?;
+    let num_visited_locations = walk_guard(map, guard_location, guard_direction)?;
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
