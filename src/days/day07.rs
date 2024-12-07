@@ -21,7 +21,11 @@ fn check_equation(
     let mut stack: Vec<(usize, u64)> = vec![(1, *numbers.first().expect("numbers is empty!"))];
 
     while let Some((current_idx, current_result)) = stack.pop() {
-        if let Some(current_number) = numbers.get(current_idx) {
+        if (current_idx == numbers.len()) & (current_result == output_value) {
+            valid = true;
+            break;
+        }
+        if let Some(&current_number) = numbers.get(current_idx) {
             for operator in operators.iter() {
                 let result: u64;
                 if operator == &"add" {
@@ -37,8 +41,7 @@ fn check_equation(
                 }
                 match result.cmp(&output_value) {
                     Equal => {
-                        valid = true;
-                        break;
+                        stack.push((current_idx + 1, result));
                     }
                     Less => {
                         stack.push((current_idx + 1, result));
