@@ -1,7 +1,6 @@
-use std::cmp::Ordering::{Equal, Greater, Less};
-use std::io::Error;
+use std::fs;
 use std::io::Write;
-use std::{fs, io};
+use std::io::{Error, ErrorKind};
 
 pub fn run() -> Result<(), Error> {
     let _ = task1();
@@ -33,24 +32,14 @@ fn check_equation(
                 } else if operator == &"mul" {
                     result = current_result * current_number;
                 } else if operator == &"cat" {
-                    result = current_result
-                        * 10u64.pow(current_number.to_string().len().try_into().unwrap())
-                        + current_number
+                    result =
+                        current_result * 10u64.pow(current_number.ilog10() + 1) + current_number
                 } else {
                     eprintln!("Unknown operator {}!", operator);
-                    return Err(io::Error::new(
-                        io::ErrorKind::InvalidInput,
-                        "Unknown Operator",
-                    ));
+                    return Err(Error::new(ErrorKind::InvalidInput, "Unknown Operator"));
                 }
-                match result.cmp(&output_value) {
-                    Equal => {
-                        stack.push((current_idx + 1, result));
-                    }
-                    Less => {
-                        stack.push((current_idx + 1, result));
-                    }
-                    Greater => {}
+                if result <= output_value {
+                    stack.push((current_idx + 1, result));
                 }
             }
         }
@@ -66,27 +55,18 @@ fn task1() -> Result<(), Error> {
 
     let mut sum_of_valid_test_values: u64 = 0;
     for line in input_data.lines() {
-        let initial_parts: Vec<&str> = line.split(':').collect();
-        let test_value = initial_parts
-            .first()
-            .expect("Line is empty?")
+        let (test_value_str, numbers_str) = line.split_once(':').expect("Line has no ':'!");
+
+        let test_value = test_value_str
             .parse::<u64>()
             .expect("could not parse test value.");
 
-        let numbers: Vec<u64>;
-        if let Some(second_element) = initial_parts.get(1) {
-            numbers = second_element
-                .split_whitespace()
-                .filter_map(|s| s.parse::<u64>().ok())
-                .collect();
-        } else {
-            numbers = Vec::new();
-            eprintln!("The line does not have any numbers.");
-        }
+        let numbers: Vec<u64> = numbers_str
+            .split_whitespace()
+            .filter_map(|s| s.parse::<u64>().ok())
+            .collect();
 
-        let valid = check_equation(test_value, numbers, vec!["add", "mul"])?;
-
-        if valid {
+        if check_equation(test_value, numbers, vec!["add", "mul"])? {
             sum_of_valid_test_values += test_value;
         }
     }
@@ -109,27 +89,18 @@ fn task2() -> Result<(), Error> {
 
     let mut sum_of_valid_test_values: u64 = 0;
     for line in input_data.lines() {
-        let initial_parts: Vec<&str> = line.split(':').collect();
-        let test_value = initial_parts
-            .first()
-            .expect("Line is empty?")
+        let (test_value_str, numbers_str) = line.split_once(':').expect("Line has no ':'!");
+
+        let test_value = test_value_str
             .parse::<u64>()
             .expect("could not parse test value.");
 
-        let numbers: Vec<u64>;
-        if let Some(second_element) = initial_parts.get(1) {
-            numbers = second_element
-                .split_whitespace()
-                .filter_map(|s| s.parse::<u64>().ok())
-                .collect();
-        } else {
-            numbers = Vec::new();
-            eprintln!("The line does not have any numbers.");
-        }
+        let numbers: Vec<u64> = numbers_str
+            .split_whitespace()
+            .filter_map(|s| s.parse::<u64>().ok())
+            .collect();
 
-        let valid = check_equation(test_value, numbers, vec!["add", "mul", "cat"])?;
-
-        if valid {
+        if check_equation(test_value, numbers, vec!["add", "mul", "cat"])? {
             sum_of_valid_test_values += test_value;
         }
     }
