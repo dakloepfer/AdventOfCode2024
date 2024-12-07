@@ -2,4 +2,4 @@ Solution for Task 1 of Day 07:
 The sum of the test values of equations that could be true with addition and multiplication is 12940396350192.
 
 Solution for Task 2 of Day 07:
-TODO 0.
+The sum of the test values of equations that could be true with addition, multiplication, and concatenation is 106016735664498.
