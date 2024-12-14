@@ -81,7 +81,7 @@ fn task1() -> Result<(), Error> {
     let (antenna_locations, height, width) = parse_map(input_data);
     let antenna_pairs = make_pairs(antenna_locations);
 
-    let mut unique_nodes: HashSet<Location> = HashSet::new();
+    let mut unique_antinodes: HashSet<Location> = HashSet::new();
 
     for (location_a, location_b) in antenna_pairs {
         let row_diff = location_b.row - location_a.row;
@@ -91,7 +91,7 @@ fn task1() -> Result<(), Error> {
         let new_col1 = location_a.col - col_diff;
 
         if (new_row1 >= 0) && (new_row1 < height) && (new_col1 >= 0) && (new_col1 < width) {
-            unique_nodes.insert(Location {
+            unique_antinodes.insert(Location {
                 row: new_row1,
                 col: new_col1,
             });
@@ -101,7 +101,7 @@ fn task1() -> Result<(), Error> {
         let new_col2 = location_b.col + col_diff;
 
         if (new_row2 >= 0) && (new_row2 < height) && (new_col2 >= 0) && (new_col2 < width) {
-            unique_nodes.insert(Location {
+            unique_antinodes.insert(Location {
                 row: new_row2,
                 col: new_col2,
             });
@@ -113,7 +113,7 @@ fn task1() -> Result<(), Error> {
     writeln!(
         solution_file,
         "The map contains {} unique antinodes.",
-        unique_nodes.len()
+        unique_antinodes.len()
     )?;
 
     Ok(())
