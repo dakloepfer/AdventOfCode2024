@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 08:
+The map contains 392 unique antinodes.
+
+Solution for Task 2 of Day 08:
+TODO 0.
