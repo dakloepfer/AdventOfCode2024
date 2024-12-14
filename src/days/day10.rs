@@ -130,7 +130,76 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 10...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day10_input.txt")?;
+
+    let (map, trailheads, height, width) = parse_map(input_data);
+
+    let mut sum_trailhead_ratings = 0;
+
+    for &trailhead in trailheads.iter() {
+        let mut current_rating: u32 = 0;
+
+        let mut to_visit: Vec<(u32, Location)> = vec![(0, trailhead)];
+
+        while let Some((current_height, current_loc)) = to_visit.pop() {
+            if current_height == 9 {
+                current_rating += 1;
+                continue;
+            }
+
+            let current_row = current_loc.row;
+            let current_col = current_loc.col;
+
+            // Up
+            if (current_row > 0) && (map[current_row - 1][current_col] == current_height + 1) {
+                to_visit.push((
+                    current_height + 1,
+                    Location {
+                        row: current_row - 1,
+                        col: current_col,
+                    },
+                ));
+            }
+
+            // Down
+            if (current_row < height - 1)
+                && (map[current_row + 1][current_col] == current_height + 1)
+            {
+                to_visit.push((
+                    current_height + 1,
+                    Location {
+                        row: current_row + 1,
+                        col: current_col,
+                    },
+                ));
+            }
+
+            // Left
+            if (current_col > 0) && (map[current_row][current_col - 1] == current_height + 1) {
+                to_visit.push((
+                    current_height + 1,
+                    Location {
+                        row: current_row,
+                        col: current_col - 1,
+                    },
+                ));
+            }
+
+            // Right
+            if (current_col < width - 1)
+                && (map[current_row][current_col + 1] == current_height + 1)
+            {
+                to_visit.push((
+                    current_height + 1,
+                    Location {
+                        row: current_row,
+                        col: current_col + 1,
+                    },
+                ));
+            }
+        }
+        sum_trailhead_ratings += current_rating;
+    }
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -138,7 +207,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day10_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 10:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "The sum of all trailhead ratings is {}.",
+        sum_trailhead_ratings
+    )?;
 
     Ok(())
 }
