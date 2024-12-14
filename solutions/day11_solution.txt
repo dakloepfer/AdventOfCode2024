@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 11:
+After blinking 25 times, I have 187738 stones.
+
+Solution for Task 2 of Day 11:
+TODO 0.
