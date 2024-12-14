@@ -9,7 +9,7 @@ pub fn run() -> Result<(), Error> {
     let (before_than, invalid_updates) = task1()?;
     let _ = task2(before_than, invalid_updates);
 
-    println!("Completed solutions for Day 4!");
+    println!("Completed solutions for Day 5!");
 
     Ok(())
 }
