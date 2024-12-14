@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 09:
+The checksum after moving all the files is 6448989155953.
+
+Solution for Task 2 of Day 09:
+TODO 0.
