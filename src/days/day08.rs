@@ -3,6 +3,19 @@ use std::fs;
 use std::io::Error;
 use std::io::Write;
 
+fn gcd(mut a: isize, mut b: isize) -> isize {
+    while b != 0 {
+        let temp = b;
+        b = a % b;
+        a = temp;
+    }
+    a.abs() // Ensure GCD is always positive
+}
+fn reduce_location_diff(row_diff: isize, col_diff: isize) -> (isize, isize) {
+    let gcd = gcd(row_diff, col_diff);
+    (row_diff / gcd, col_diff / gcd)
+}
+
 #[derive(Eq, Hash, PartialEq, Clone, Copy)]
 struct Location {
     row: isize,
@@ -122,7 +135,58 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 8...");
 
-    let solution = 0; // TODO
+    let input_data: Vec<Vec<char>> = fs::read_to_string("input_data/day08_input.txt")?
+        .lines()
+        .map(|line| line.chars().collect())
+        .collect();
+
+    let (antenna_locations, height, width) = parse_map(input_data);
+    let antenna_pairs = make_pairs(antenna_locations);
+
+    let mut resonant_antinodes: HashSet<Location> = HashSet::new();
+
+    for (location_a, location_b) in antenna_pairs {
+        let raw_row_diff = location_b.row - location_a.row;
+        let raw_col_diff = location_b.col - location_a.col;
+
+        let (row_diff, col_diff) = reduce_location_diff(raw_row_diff, raw_col_diff);
+
+        // Direction 1
+        let mut factor = 0;
+        loop {
+            let new_row = location_a.row - factor * row_diff;
+            let new_col = location_a.col - factor * col_diff;
+
+            if (new_row >= 0) && (new_row < height) && (new_col >= 0) && (new_col < width) {
+                resonant_antinodes.insert(Location {
+                    row: new_row,
+                    col: new_col,
+                });
+            } else {
+                break;
+            }
+
+            factor += 1;
+        }
+
+        // Direction 2
+        let mut factor = 0;
+        loop {
+            let new_row = location_a.row + factor * row_diff; // antinodes could be between antennas
+            let new_col = location_a.col + factor * col_diff;
+
+            if (new_row >= 0) && (new_row < height) && (new_col >= 0) && (new_col < width) {
+                resonant_antinodes.insert(Location {
+                    row: new_row,
+                    col: new_col,
+                });
+            } else {
+                break;
+            }
+
+            factor += 1;
+        }
+    }
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -130,7 +194,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day08_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 08:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "The map contains {} unique resonant antinodes.",
+        resonant_antinodes.len()
+    )?;
 
     Ok(())
 }
