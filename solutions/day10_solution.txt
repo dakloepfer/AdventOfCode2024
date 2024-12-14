@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 10:
+The sum of all trailhead scores is 733.
+
+Solution for Task 2 of Day 10:
+TODO 0.
