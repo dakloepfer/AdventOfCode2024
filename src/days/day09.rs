@@ -34,10 +34,28 @@ fn parse_diskmap(diskmap: Vec<u32>) -> (Vec<ContiguousBlock>, Vec<ContiguousBloc
     (empty_blocks, file_locations)
 }
 
-fn compute_post_move_checksum(
-    mut empty_blocks: Vec<ContiguousBlock>,
-    mut file_locations: Vec<ContiguousBlock>,
-) -> u64 {
+pub fn run() -> Result<(), Error> {
+    let _ = task1();
+    let _ = task2();
+
+    println!("Completed solutions for Day 9!");
+
+    Ok(())
+}
+
+fn task1() -> Result<(), Error> {
+    println!("Computing solution for task 1 of Day 9...");
+
+    let input_data = fs::read_to_string("input_data/day09_input.txt")?;
+    let diskmap: Vec<u32> = input_data
+        .chars()
+        .map(|c| {
+            c.to_digit(10)
+                .expect("Input string contains non-digit characters")
+        })
+        .collect();
+
+    let (mut empty_blocks, mut file_locations) = parse_diskmap(diskmap);
     let mut checksum = 0;
 
     let mut file_idx = file_locations.len() - 1;
@@ -70,33 +88,6 @@ fn compute_post_move_checksum(
         file_locations[file_idx].end -= 1;
     }
 
-    checksum
-}
-
-pub fn run() -> Result<(), Error> {
-    let _ = task1();
-    let _ = task2();
-
-    println!("Completed solutions for Day 9!");
-
-    Ok(())
-}
-
-fn task1() -> Result<(), Error> {
-    println!("Computing solution for task 1 of Day 9...");
-
-    let input_data = fs::read_to_string("input_data/day09_input.txt")?;
-    let diskmap: Vec<u32> = input_data
-        .chars()
-        .map(|c| {
-            c.to_digit(10)
-                .expect("Input string contains non-digit characters")
-        })
-        .collect();
-
-    let (empty_blocks, file_locations) = parse_diskmap(diskmap);
-    let checksum = compute_post_move_checksum(empty_blocks, file_locations);
-
     let mut solution_file = fs::File::create("solutions/day09_solution.txt")?;
     writeln!(solution_file, "Solution for Task 1 of Day 09:")?;
     writeln!(
@@ -111,7 +102,44 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 9...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day09_input.txt")?;
+    let diskmap: Vec<u32> = input_data
+        .chars()
+        .map(|c| {
+            c.to_digit(10)
+                .expect("Input string contains non-digit characters")
+        })
+        .collect();
+
+    let (mut empty_blocks, file_locations) = parse_diskmap(diskmap);
+    let mut checksum: u64 = 0;
+
+    let mut file_idx = file_locations.len() - 1;
+
+    while file_idx > 0 {
+        let file_block = file_locations[file_idx];
+        let file_length = file_block.end - file_block.start;
+
+        for empty_block in empty_blocks.iter_mut() {
+            if empty_block.start >= file_block.end {
+                // file stays in same location
+                checksum += file_idx as u64
+                    * (((file_block.start + file_block.end - 1)
+                        * (file_block.end - file_block.start))
+                        / 2);
+                break;
+            }
+            if empty_block.end - empty_block.start >= file_length {
+                checksum += file_idx as u64
+                    * (((empty_block.start + empty_block.start + file_length - 1) * file_length)
+                        / 2);
+                empty_block.start += file_length;
+                break;
+            }
+        }
+
+        file_idx -= 1;
+    }
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -119,7 +147,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day09_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 09:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "The checksum after moving the files contiguously is {}.",
+        checksum
+    )?;
 
     Ok(())
 }
