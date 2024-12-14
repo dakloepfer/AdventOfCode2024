@@ -43,68 +43,68 @@ fn check_for_next_char(
     source_col: usize,
     target_char: char,
     direction: Direction,
-) -> Result<(bool, usize, usize), Error> {
+) -> (bool, usize, usize) {
     let target_row: usize;
     let target_col: usize;
     match direction {
         Direction::Up => {
             if source_row == 0 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_row = source_row - 1;
             target_col = source_col;
         }
         Direction::UpRight => {
             if source_row == 0 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_row = source_row - 1;
             if source_col == word_grid[target_row].len() - 1 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_col = source_col + 1;
         }
         Direction::Right => {
             target_row = source_row;
             if source_col == word_grid[target_row].len() - 1 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_col = source_col + 1;
         }
         Direction::DownRight => {
             if source_row == word_grid.len() - 1 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_row = source_row + 1;
             if source_col == word_grid[target_row].len() - 1 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_col = source_col + 1;
         }
         Direction::Down => {
             if source_row == word_grid.len() - 1 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_row = source_row + 1;
             target_col = source_col;
         }
         Direction::DownLeft => {
             if (source_row == word_grid.len() - 1) || (source_col == 0) {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_row = source_row + 1;
             target_col = source_col - 1;
         }
         Direction::Left => {
             if source_col == 0 {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_row = source_row;
             target_col = source_col - 1;
         }
         Direction::UpLeft => {
             if (source_row == 0) || (source_col == 0) {
-                return Ok((false, source_row, source_col));
+                return (false, source_row, source_col);
             }
             target_row = source_row - 1;
             target_col = source_col - 1;
@@ -112,9 +112,9 @@ fn check_for_next_char(
     }
 
     if word_grid[target_row][target_col] == target_char {
-        Ok((true, target_row, target_col))
+        (true, target_row, target_col)
     } else {
-        Ok((false, target_row, target_col))
+        (false, target_row, target_col)
     }
 }
 
@@ -145,7 +145,7 @@ fn task1() -> Result<(), Error> {
                             next_col,
                             next_char,
                             direction.clone(),
-                        )?;
+                        );
                         if !success {
                             break;
                         }

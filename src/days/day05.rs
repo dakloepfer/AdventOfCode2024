@@ -108,7 +108,7 @@ impl Dag {
             outgoing_edges: HashMap::new(),
         }
     }
-    pub fn add_edge(&mut self, source: u32, sink: u32) -> Result<(), Error> {
+    pub fn add_edge(&mut self, source: u32, sink: u32) {
         if !self.nodes.contains(&source) {
             self.nodes.insert(source);
             self.incoming_edges.insert(source, HashSet::new());
@@ -129,11 +129,9 @@ impl Dag {
                 .expect("Sink not in Graph!")
                 .insert(source);
         }
-
-        Ok(())
     }
 
-    pub fn topological_sort(&mut self) -> Result<Vec<u32>, Error> {
+    pub fn topological_sort(&mut self) -> Vec<u32> {
         let mut topological_sort: Vec<u32> = Vec::new();
         let mut no_incoming_edges: VecDeque<u32> = VecDeque::new();
         let mut in_degree: HashMap<u32, usize> = HashMap::new();
@@ -180,7 +178,7 @@ impl Dag {
             eprintln!("Graph is not acyclic!");
         }
 
-        Ok(topological_sort)
+        topological_sort
     }
 }
 
@@ -194,11 +192,11 @@ fn task2(before_than: RuleSet, invalid_updates: UpdateList) -> Result<(), Error>
             let successor_pages = before_than.get(page).unwrap();
             for other_page in update.iter() {
                 if successor_pages.contains(other_page) {
-                    let _ = graph.add_edge(*page, *other_page);
+                    graph.add_edge(*page, *other_page);
                 }
             }
         }
-        let repaired_update = graph.topological_sort()?;
+        let repaired_update = graph.topological_sort();
         sum_of_middle_pages += repaired_update[repaired_update.len() / 2];
     }
 

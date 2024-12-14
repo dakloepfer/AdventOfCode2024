@@ -17,7 +17,7 @@ fn task1() -> Result<(), Error> {
     let input_data = fs::read_to_string("input_data/day03_input.txt")?;
     let mut program_cleaner = ProgramCleaner::new();
 
-    let program_solution = program_cleaner.compute_sum_of_muls(input_data, false)?;
+    let program_solution = program_cleaner.compute_sum_of_muls(input_data, false);
 
     let mut solution_file = fs::File::create("solutions/day03_solution.txt")?;
     writeln!(solution_file, "Solution for Task 1 of Day 03:")?;
@@ -36,7 +36,7 @@ fn task2() -> Result<(), Error> {
     let input_data = fs::read_to_string("input_data/day03_input.txt")?;
     let mut program_cleaner = ProgramCleaner::new();
 
-    let program_solution = program_cleaner.compute_sum_of_muls(input_data, true)?;
+    let program_solution = program_cleaner.compute_sum_of_muls(input_data, true);
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -72,24 +72,19 @@ struct ProgramCleaner {
 }
 
 impl ProgramCleaner {
-    fn reset(&mut self) -> Result<(), Error> {
+    fn reset(&mut self) {
         self.current_state = LookingFor::Mul;
         self.current_mul_command = Vec::new();
         self.current_first_number = Vec::new();
         self.current_second_number = Vec::new();
         self.current_conditional = Vec::new();
-        Ok(())
     }
 
     /// Note: this adds to the existing value of running_sum
-    pub fn compute_sum_of_muls(
-        &mut self,
-        program: String,
-        enable_conditionals: bool,
-    ) -> Result<i32, Error> {
+    pub fn compute_sum_of_muls(&mut self, program: String, enable_conditionals: bool) -> i32 {
         for el in program.chars() {
             if el == 'd' && enable_conditionals {
-                let _ = self.reset();
+                self.reset();
                 if self.mul_enabled {
                     self.current_state = LookingFor::Dont; // check if we get a disabler
                 } else {
@@ -109,7 +104,7 @@ impl ProgramCleaner {
                 if el == expected_next_char {
                     self.current_mul_command.push(el);
                 } else {
-                    let _ = self.reset();
+                    self.reset();
                 }
                 if self.current_mul_command.len() == 4 {
                     // completed mul command
@@ -121,7 +116,7 @@ impl ProgramCleaner {
                 } else if el == ',' {
                     self.current_state = LookingFor::SecondNum;
                 } else {
-                    let _ = self.reset();
+                    self.reset();
                 }
             } else if self.current_state == LookingFor::SecondNum {
                 if (self.current_second_number.is_empty() && el == '-') || el.is_numeric() {
@@ -140,9 +135,9 @@ impl ProgramCleaner {
                         .parse::<i32>()
                         .expect("Failed to convert second number to i32");
                     self.running_sum += first_number * second_number;
-                    let _ = self.reset();
+                    self.reset();
                 } else {
-                    let _ = self.reset();
+                    self.reset();
                 }
             } else if self.current_state == LookingFor::Do {
                 let expected_next_char: char = match self.current_conditional.len() {
@@ -156,12 +151,12 @@ impl ProgramCleaner {
                 if el == expected_next_char {
                     self.current_conditional.push(el);
                 } else {
-                    let _ = self.reset();
+                    self.reset();
                 }
                 if self.current_conditional.len() == 4 {
                     // completed do() command
                     self.mul_enabled = true;
-                    let _ = self.reset();
+                    self.reset();
                 }
             } else if self.current_state == LookingFor::Dont {
                 let expected_next_char: char = match self.current_conditional.len() {
@@ -178,17 +173,17 @@ impl ProgramCleaner {
                 if el == expected_next_char {
                     self.current_conditional.push(el);
                 } else {
-                    let _ = self.reset();
+                    self.reset();
                 }
                 if self.current_conditional.len() == 7 {
                     // completed don't() command
                     self.mul_enabled = false;
-                    let _ = self.reset();
+                    self.reset();
                 }
             }
         }
 
-        Ok(self.running_sum)
+        self.running_sum
     }
 
     pub fn new() -> ProgramCleaner {

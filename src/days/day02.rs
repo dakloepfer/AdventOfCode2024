@@ -11,41 +11,41 @@ pub fn run() -> Result<(), Error> {
     Ok(())
 }
 
-fn check_level_pair(level_a: i32, level_b: i32, increasing: bool) -> Result<bool, Error> {
+fn check_level_pair(level_a: i32, level_b: i32, increasing: bool) -> bool {
     let level_diff = level_b - level_a;
 
     if increasing {
         if level_diff <= 0 {
-            return Ok(false);
+            return false;
         }
     } else {
         // decreasing
         if level_diff >= 0 {
-            return Ok(false);
+            return false;
         }
     }
     if level_diff.abs() > 3 {
-        return Ok(false);
+        return false;
     }
-    Ok(true)
+    true
 }
 
-fn check_safe(levels: Vec<i32>) -> Result<bool, Error> {
+fn check_safe(levels: Vec<i32>) -> bool {
     if levels.len() < 2 {
-        return Ok(true);
+        return true;
     }
 
     let mut safe = true;
     let increasing = levels[1] - levels[0] > 0;
     let mut prev_level = levels[0];
     for level in levels.iter().skip(1) {
-        if !check_level_pair(prev_level, *level, increasing)? {
+        if !check_level_pair(prev_level, *level, increasing) {
             safe = false;
             break;
         }
         prev_level = *level;
     }
-    Ok(safe)
+    safe
 }
 
 fn task1() -> Result<(), Error> {
@@ -60,7 +60,7 @@ fn task1() -> Result<(), Error> {
             .filter_map(|s| s.parse::<i32>().ok())
             .collect();
 
-        let safe = check_safe(levels)?;
+        let safe = check_safe(levels);
         if safe {
             num_safe += 1;
         }
@@ -88,7 +88,7 @@ fn task2() -> Result<(), Error> {
             .filter_map(|s| s.parse::<i32>().ok())
             .collect();
 
-        let safe_without_first = check_safe(levels.iter().skip(1).cloned().collect())?;
+        let safe_without_first = check_safe(levels.iter().skip(1).cloned().collect());
         if safe_without_first {
             num_safe += 1;
             continue;
@@ -100,7 +100,7 @@ fn task2() -> Result<(), Error> {
                 .chain(levels[2..].iter())
                 .cloned()
                 .collect(),
-        )?;
+        );
         if safe_without_second {
             num_safe += 1;
             continue;
@@ -118,7 +118,7 @@ fn task2() -> Result<(), Error> {
             let current_level = levels[prev_idx];
             let next_level = levels[next_idx];
 
-            if check_level_pair(current_level, next_level, increasing)? {
+            if check_level_pair(current_level, next_level, increasing) {
                 prev_idx = curr_idx;
                 curr_idx = next_idx;
                 next_idx += 1;
@@ -131,7 +131,7 @@ fn task2() -> Result<(), Error> {
             }
 
             // try removing current level
-            if check_level_pair(prev_level, next_level, increasing)? {
+            if check_level_pair(prev_level, next_level, increasing) {
                 skipped_level_already = true;
                 curr_idx = next_idx;
                 next_idx += 1;

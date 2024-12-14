@@ -40,7 +40,7 @@ struct Map {
     width: usize,
 }
 impl Map {
-    pub fn from_string(input_data: String) -> Result<(Map, Location, Direction), Error> {
+    pub fn from_string(input_data: String) -> (Map, Location, Direction) {
         let mut barriers = HashSet::new();
         let mut guard_location = Location { row: 0, col: 0 };
         let mut guard_direction: Direction = Direction::Up;
@@ -78,7 +78,7 @@ impl Map {
         height = height.saturating_add(1); // index to dimension
         width = width.saturating_add(1);
 
-        Ok((
+        (
             Map {
                 barriers,
                 height,
@@ -86,7 +86,7 @@ impl Map {
             },
             guard_location,
             guard_direction,
-        ))
+        )
     }
 }
 
@@ -94,7 +94,7 @@ fn walk_guard(
     map: &Map,
     mut guard_location: Location,
     mut guard_direction: Direction,
-) -> Result<(bool, HashSet<Location>), Error> {
+) -> (bool, HashSet<Location>) {
     let mut visited_locations: HashSet<Location> = HashSet::new();
     let mut visited_states: HashSet<GuardState> = HashSet::new();
     let mut has_loop = false;
@@ -164,7 +164,7 @@ fn walk_guard(
         }
     }
 
-    Ok((has_loop, visited_locations))
+    (has_loop, visited_locations)
 }
 
 fn task1() -> Result<(), Error> {
@@ -173,8 +173,8 @@ fn task1() -> Result<(), Error> {
     let input_data = fs::read_to_string("input_data/day06_input.txt")?;
 
     // guard location is row, col
-    let (map, guard_location, guard_direction) = Map::from_string(input_data)?;
-    let (_, visited_locations) = walk_guard(&map, guard_location, guard_direction)?;
+    let (map, guard_location, guard_direction) = Map::from_string(input_data);
+    let (_, visited_locations) = walk_guard(&map, guard_location, guard_direction);
 
     let mut solution_file = fs::File::create("solutions/day04_solution.txt")?;
     writeln!(solution_file, "Solution for Task 1 of Day 06:")?;
@@ -193,14 +193,14 @@ fn task2() -> Result<(), Error> {
     let input_data = fs::read_to_string("input_data/day06_input.txt")?;
 
     // guard location is row, col
-    let (mut map, guard_location, guard_direction) = Map::from_string(input_data)?;
-    let (_, original_visited_locations) = walk_guard(&map, guard_location, guard_direction)?;
+    let (mut map, guard_location, guard_direction) = Map::from_string(input_data);
+    let (_, original_visited_locations) = walk_guard(&map, guard_location, guard_direction);
 
     // just add an obstacle and see if there is a loop
     let mut num_loop_locations: u32 = 0;
     for new_obstacle_location in original_visited_locations {
         map.barriers.insert(new_obstacle_location);
-        let (has_loop, _) = walk_guard(&map, guard_location, guard_direction)?;
+        let (has_loop, _) = walk_guard(&map, guard_location, guard_direction);
         map.barriers.remove(&new_obstacle_location);
 
         if has_loop {
