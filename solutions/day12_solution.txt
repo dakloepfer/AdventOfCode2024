@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 12:
+The total price for all fences is 1452678.
+
+Solution for Task 2 of Day 12:
+TODO 0.
