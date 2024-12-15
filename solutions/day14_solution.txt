@@ -2,4 +2,4 @@ Solution for Task 1 of Day 14:
 The safety factor after exactly 100 seconds is 215987200.
 
 Solution for Task 2 of Day 14:
-TODO 0.
+The robots look like a Christmas Tree after 8050 seconds.
