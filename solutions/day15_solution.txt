@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 15:
+The sum of all boxes' GPS coordinates is 1371036.
+
+Solution for Task 2 of Day 15:
+TODO 0.
