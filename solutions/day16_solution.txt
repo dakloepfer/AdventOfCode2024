@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 16:
+The lowest cost to move from Start to End is 65436.
+
+Solution for Task 2 of Day 16:
+TODO 0.
