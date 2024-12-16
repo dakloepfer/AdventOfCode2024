@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::collections::BinaryHeap; // I want to only use the standard library
 use std::collections::{HashMap, HashSet};
 use std::fs;
@@ -109,14 +110,16 @@ impl Maze {
         }
     }
 
-    fn dijkstra(&self) -> i32 {
+    fn dijkstra(&self) -> (i32, HashSet<Location>) {
         let mut priority_queue: BinaryHeap<HeapEntry> = BinaryHeap::new();
         let mut state_costs: HashMap<ReindeerState, u32> = HashMap::new();
+        let mut predecessors: HashMap<ReindeerState, Vec<ReindeerState>> = HashMap::new();
         state_costs.insert(self.start_state, 0);
         priority_queue.push(HeapEntry {
             reindeer_state: self.start_state,
             cost: 0,
         });
+        predecessors.insert(self.start_state, Vec::new());
 
         while let Some(HeapEntry {
             reindeer_state,
@@ -129,7 +132,17 @@ impl Maze {
                 }
             }
             if reindeer_state.location == self.end_location {
-                return cost as i32;
+                let mut any_shortest_path_locations: HashSet<Location> = HashSet::new();
+                let mut states_to_add: Vec<ReindeerState> = vec![reindeer_state];
+
+                while let Some(state_to_add) = states_to_add.pop() {
+                    any_shortest_path_locations.insert(state_to_add.location);
+                    for predecessor in predecessors.get(&state_to_add).unwrap() {
+                        states_to_add.push(*predecessor);
+                    }
+                }
+
+                return (cost as i32, any_shortest_path_locations);
             }
 
             let turn_left;
@@ -207,58 +220,95 @@ impl Maze {
                 }
             }
 
+            let turn_left_cost = cost + self.turning_cost;
+            let turn_right_cost = cost + self.turning_cost;
+            let move_forward_cost = cost + self.moving_cost;
+
             if let Some(&prev_turn_left_cost) = state_costs.get(&turn_left) {
-                if cost + self.turning_cost < prev_turn_left_cost {
-                    state_costs.insert(turn_left, cost + self.turning_cost);
-                    priority_queue.push(HeapEntry {
-                        cost: cost + self.turning_cost,
-                        reindeer_state: turn_left,
-                    })
+                match turn_left_cost.cmp(&prev_turn_left_cost) {
+                    Less => {
+                        state_costs.insert(turn_left, turn_left_cost);
+                        priority_queue.push(HeapEntry {
+                            cost: turn_left_cost,
+                            reindeer_state: turn_left,
+                        });
+                        predecessors.insert(turn_left, vec![reindeer_state]);
+                    }
+                    Equal => {
+                        predecessors
+                            .get_mut(&turn_left)
+                            .unwrap()
+                            .push(reindeer_state);
+                    }
+                    Greater => {}
                 }
             } else {
-                state_costs.insert(turn_left, cost + self.turning_cost);
+                state_costs.insert(turn_left, turn_left_cost);
                 priority_queue.push(HeapEntry {
                     cost: cost + self.turning_cost,
                     reindeer_state: turn_left,
-                })
+                });
+                predecessors.insert(turn_left, vec![reindeer_state]);
             }
 
             if let Some(&prev_turn_right_cost) = state_costs.get(&turn_right) {
-                if cost + self.turning_cost < prev_turn_right_cost {
-                    state_costs.insert(turn_right, cost + self.turning_cost);
-                    priority_queue.push(HeapEntry {
-                        cost: cost + self.turning_cost,
-                        reindeer_state: turn_right,
-                    })
+                match turn_right_cost.cmp(&prev_turn_right_cost) {
+                    Less => {
+                        state_costs.insert(turn_right, turn_right_cost);
+                        priority_queue.push(HeapEntry {
+                            cost: turn_right_cost,
+                            reindeer_state: turn_right,
+                        });
+                        predecessors.insert(turn_right, vec![reindeer_state]);
+                    }
+                    Equal => {
+                        predecessors
+                            .get_mut(&turn_right)
+                            .unwrap()
+                            .push(reindeer_state);
+                    }
+                    Greater => {}
                 }
             } else {
                 state_costs.insert(turn_right, cost + self.turning_cost);
                 priority_queue.push(HeapEntry {
                     cost: cost + self.turning_cost,
                     reindeer_state: turn_right,
-                })
+                });
+                predecessors.insert(turn_right, vec![reindeer_state]);
             }
 
             if !self.wall_pos.contains(&move_forward.location) {
                 if let Some(&prev_move_forward_cost) = state_costs.get(&move_forward) {
-                    if cost + self.moving_cost < prev_move_forward_cost {
-                        state_costs.insert(move_forward, cost + self.turning_cost);
-                        priority_queue.push(HeapEntry {
-                            cost: cost + self.moving_cost,
-                            reindeer_state: move_forward,
-                        })
+                    match move_forward_cost.cmp(&prev_move_forward_cost) {
+                        Less => {
+                            state_costs.insert(move_forward, cost + self.turning_cost);
+                            priority_queue.push(HeapEntry {
+                                cost: move_forward_cost,
+                                reindeer_state: move_forward,
+                            });
+                            predecessors.insert(move_forward, vec![reindeer_state]);
+                        }
+                        Equal => {
+                            predecessors
+                                .get_mut(&move_forward)
+                                .unwrap()
+                                .push(reindeer_state);
+                        }
+                        Greater => {}
                     }
                 } else {
                     state_costs.insert(move_forward, cost + self.moving_cost);
                     priority_queue.push(HeapEntry {
-                        cost: cost + self.moving_cost,
+                        cost: move_forward_cost,
                         reindeer_state: move_forward,
-                    })
+                    });
+                    predecessors.insert(move_forward, vec![reindeer_state]);
                 }
             }
         }
 
-        i32::MAX // end location unreachable
+        (i32::MAX, HashSet::new()) // end location unreachable
     }
 }
 
@@ -277,7 +327,7 @@ fn task1() -> Result<(), Error> {
     let input_data = fs::read_to_string("input_data/day16_input.txt")?;
 
     let maze = Maze::from_str(&input_data);
-    let lowest_cost = maze.dijkstra();
+    let (lowest_cost, _) = maze.dijkstra();
 
     let mut solution_file = fs::File::create("solutions/day16_solution.txt")?;
     writeln!(solution_file, "Solution for Task 1 of Day 16:")?;
@@ -293,7 +343,10 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 16...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day16_input.txt")?;
+
+    let maze = Maze::from_str(&input_data);
+    let (_, any_best_path_locations) = maze.dijkstra();
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -301,7 +354,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day16_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 16:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "There are {} locations that are on at least one closest path.",
+        any_best_path_locations.len()
+    )?;
 
     Ok(())
 }
