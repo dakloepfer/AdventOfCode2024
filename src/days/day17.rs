@@ -196,7 +196,7 @@ fn task1() -> Result<(), Error> {
 
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 17...");
-    println!("This would work in theory (until overflow), but this takes way too long. The actual solution needs to be obtained by analysing the program's actions and back-tracking the necessary register states.");
+    println!("NOTE / WARNING: This would work in theory (until overflow), but this takes way too long. The actual solution for the input needs to be obtained by analysing the program's actions and back-tracking the necessary register states.");
 
     let input_data = fs::read_to_string("input_data/day17_input.txt")?;
 
