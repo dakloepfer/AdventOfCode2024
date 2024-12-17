@@ -131,7 +131,23 @@ impl Computer {
         output
     }
 
-    fn check_output_program_copy(&mut self, program: Vec<u32>) -> bool {
+    fn get_first_program_output(&mut self, program: Vec<u32>) -> u64 {
+        while self.instruction_pointer < program.len() as u32 - 1 {
+            let instruction = program[self.instruction_pointer as usize];
+            let operand = program[self.instruction_pointer as usize + 1];
+
+            let (jumped, output_maybe) = self.execute_instruction(instruction, operand);
+            if let Some(out_val) = output_maybe {
+                return out_val;
+            }
+            if !jumped {
+                self.instruction_pointer += 2;
+            }
+        }
+        0 // default value
+    }
+
+    fn _check_output_program_copy(&mut self, program: Vec<u32>) -> bool {
         let mut output: Vec<u64> = Vec::new();
 
         while self.instruction_pointer < program.len() as u32 - 1 {
@@ -191,7 +207,7 @@ fn task1() -> Result<(), Error> {
     Ok(())
 }
 
-fn task2() -> Result<(), Error> {
+fn _task2_general() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 17...");
     println!("NOTE / WARNING: This would work in theory (until overflow), but this takes way too long. The actual solution for the input needs to be obtained by analysing the program's actions and back-tracking the necessary register states.");
 
@@ -206,7 +222,7 @@ fn task2() -> Result<(), Error> {
         let mut test_computer = computer;
         test_computer.reg_a = reg_a_start_value;
 
-        if test_computer.check_output_program_copy(program.clone()) {
+        if test_computer._check_output_program_copy(program.clone()) {
             break;
         }
         reg_a_start_value += 1;
@@ -219,6 +235,63 @@ fn task2() -> Result<(), Error> {
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 17:")?;
     writeln!(solution_file, "The smallest initial value of register A that causes the program to output a copy of itself is {}.", reg_a_start_value)?;
+
+    Ok(())
+}
+
+fn start_value_vector_to_u64(start_value_vec: &[u32]) -> u64 {
+    let mut start_value = 0;
+    for val in start_value_vec.iter() {
+        start_value += *val as u64;
+        start_value <<= 3;
+    }
+    start_value >> 3
+}
+fn task2() -> Result<(), Error> {
+    println!("Computing solution for task 2 of Day 17...");
+    println!("This solution makes use of the fact that for the given input program, the program loops, right-shifting the value in register A by 3 bits each iteration and outputting a single value, until register A reaches 0.");
+
+    let input_data = fs::read_to_string("input_data/day17_input.txt")?;
+
+    let (computer_config, program_str) = input_data.split_once("\n\n").unwrap();
+    let program = program_from_str(program_str);
+    let computer = Computer::from_config(computer_config);
+
+    let mut reg_a_start_value_vec: Vec<u32> = Vec::new();
+
+    let mut initial_test_value = 0;
+    while reg_a_start_value_vec.len() < program.len() {
+        let mut success = false;
+        for test_bits in initial_test_value..8 {
+            reg_a_start_value_vec.push(test_bits);
+
+            let mut test_computer = computer;
+            test_computer.reg_a = start_value_vector_to_u64(&reg_a_start_value_vec);
+
+            if test_computer.get_first_program_output(program.clone())
+                == program[program.len() - reg_a_start_value_vec.len()] as u64
+            {
+                success = true;
+                break;
+            }
+
+            reg_a_start_value_vec.pop();
+        }
+        if !success {
+            // go back and continue looking
+            initial_test_value = reg_a_start_value_vec.pop().unwrap() + 1;
+        } else {
+            initial_test_value = 0;
+        }
+    }
+
+    let mut solution_file = fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open("solutions/day17_solution.txt")?;
+    writeln!(solution_file)?;
+    writeln!(solution_file, "Solution for Task 2 of Day 17:")?;
+    writeln!(solution_file, "The smallest initial value of register A that causes the program to output a copy of itself is {}.", start_value_vector_to_u64(&reg_a_start_value_vec))?;
 
     Ok(())
 }
