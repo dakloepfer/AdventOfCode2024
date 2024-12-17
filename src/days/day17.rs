@@ -63,10 +63,7 @@ impl Computer {
         }
     }
     fn compute_dv(&mut self, operand: u32) -> u64 {
-        let numerator = self.reg_a;
-        let denominator = 2u64.pow(self.operand_to_combo(operand) as u32);
-
-        numerator / denominator
+        self.reg_a >> self.operand_to_combo(operand)
     }
     fn exec_adv(&mut self, operand: u32) {
         self.reg_a = self.compute_dv(operand);
