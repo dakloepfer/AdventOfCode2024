@@ -174,11 +174,11 @@ fn task1() -> Result<(), Error> {
 
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 18...");
-
     let input_data = fs::read_to_string("input_data/day18_input.txt")?;
 
     let mut memory_space = MemorySpace::new(71, 71);
     let mut first_cut_off_byte = Location { x: 0, y: 0 };
+    // It would be faster to compute the fastest path, then recompute it only once a block falls on that path (depending on the pattern in which the blocks fall it may or may not be faster than binary-searching for the block), but just iterating is very simple to implement and fast enough
     for corrupted_loc_str in input_data.trim().lines() {
         let (corrupted_x_str, corrupted_y_str) = corrupted_loc_str.split_once(',').unwrap();
         let corrupted_x: u32 = corrupted_x_str.parse().unwrap();
