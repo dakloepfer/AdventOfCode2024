@@ -51,7 +51,7 @@ impl MemorySpace {
     }
 
     /// Dijkstra's algorithm
-    fn shortest_path_length(&self, start_pos: Location, end_pos: Location) -> u32 {
+    fn shortest_path_length(&self, start_pos: Location, end_pos: Location) -> (bool, u32) {
         let mut priority_queue: BinaryHeap<HeapEntry> = BinaryHeap::new();
         let mut state_costs: HashMap<Location, u32> = HashMap::new();
 
@@ -68,7 +68,7 @@ impl MemorySpace {
                 }
             }
             if location == end_pos {
-                return cost;
+                return (true, cost);
             }
 
             let mut neighbours = Vec::new();
@@ -132,7 +132,7 @@ impl MemorySpace {
                 }
             }
         }
-        u32::MAX // end location unreachable
+        (false, u32::MAX) // end location unreachable
     }
 }
 
@@ -162,7 +162,7 @@ fn task1() -> Result<(), Error> {
         memory_space.corrupt_position(corrupted_x, corrupted_y);
     }
 
-    let shortest_path_length =
+    let (_, shortest_path_length) =
         memory_space.shortest_path_length(Location { x: 0, y: 0 }, Location { x: 70, y: 70 });
 
     let mut solution_file = fs::File::create("solutions/day18_solution.txt")?;
@@ -175,7 +175,28 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 18...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day18_input.txt")?;
+
+    let mut memory_space = MemorySpace::new(71, 71);
+    let mut first_cut_off_byte = Location { x: 0, y: 0 };
+    for corrupted_loc_str in input_data.trim().lines() {
+        let (corrupted_x_str, corrupted_y_str) = corrupted_loc_str.split_once(',').unwrap();
+        let corrupted_x: u32 = corrupted_x_str.parse().unwrap();
+        let corrupted_y: u32 = corrupted_y_str.parse().unwrap();
+
+        memory_space.corrupt_position(corrupted_x, corrupted_y);
+
+        let (reachable, _) =
+            memory_space.shortest_path_length(Location { x: 0, y: 0 }, Location { x: 70, y: 70 });
+
+        if !reachable {
+            first_cut_off_byte = Location {
+                x: corrupted_x,
+                y: corrupted_y,
+            };
+            break;
+        }
+    }
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -183,7 +204,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day18_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 18:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "The first byte completely cutting off the path to the exit falls at coordinates ({},{}).",
+        first_cut_off_byte.x, first_cut_off_byte.y
+    )?;
 
     Ok(())
 }

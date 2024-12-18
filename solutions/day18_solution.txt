@@ -2,4 +2,4 @@ Solution for Task 1 of Day 18:
 After 1024 bytes have fallen, the shortest path from (0, 0) to (70, 70) avoiding corrupted memory locations has length 360.
 
 Solution for Task 2 of Day 18:
-TODO 0.
+The first byte completely cutting off the path to the exit falls at coordinates (58,62).
