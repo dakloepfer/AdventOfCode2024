@@ -2,4 +2,4 @@ Solution for Task 1 of Day 19:
 324 of the designs provided are possible.
 
 Solution for Task 2 of Day 19:
-TODO 0.
+The sum of all the ways to arrange each design is 575227823167869.

@@ -79,6 +79,29 @@ fn parse_towels(towels_str: &str) -> HashMap<Stripe, Vec<Design>> {
     towels
 }
 
+fn possible_remaining_design(remaining_design: Design, towel: Design) -> Option<Design> {
+    let mut possible_remaining_design = remaining_design.clone();
+    let mut towel_is_possible = true;
+
+    for stripe in towel.iter().rev() {
+        if let Some(required_next_stripe) = possible_remaining_design.pop() {
+            if *stripe == required_next_stripe {
+            } else {
+                towel_is_possible = false;
+                break;
+            }
+        } else {
+            towel_is_possible = false;
+            break;
+        }
+    }
+    if towel_is_possible {
+        Some(possible_remaining_design)
+    } else {
+        None
+    }
+}
+
 fn is_design_possible(towels: HashMap<Stripe, Vec<Design>>, design: Design) -> bool {
     let mut priority_queue: BinaryHeap<HeapEntry> = BinaryHeap::new();
 
@@ -94,23 +117,11 @@ fn is_design_possible(towels: HashMap<Stripe, Vec<Design>>, design: Design) -> b
 
         if let Some(possible_next_towels) = towels.get(remaining_design.last().unwrap()) {
             for possible_next_towel in possible_next_towels.iter() {
-                let mut possible_remaining_design = remaining_design.clone();
-                let mut towel_is_possible = true;
-                for stripe in possible_next_towel.iter().rev() {
-                    if let Some(required_next_stripe) = possible_remaining_design.pop() {
-                        if *stripe == required_next_stripe {
-                        } else {
-                            towel_is_possible = false;
-                            break;
-                        }
-                    } else {
-                        towel_is_possible = false;
-                        break;
-                    }
-                }
-                if towel_is_possible {
+                if let Some(next_remaining_design) =
+                    possible_remaining_design(remaining_design.clone(), possible_next_towel.clone())
+                {
                     priority_queue.push(HeapEntry {
-                        design: possible_remaining_design,
+                        design: next_remaining_design,
                     });
                 }
             }
@@ -118,6 +129,38 @@ fn is_design_possible(towels: HashMap<Stripe, Vec<Design>>, design: Design) -> b
     }
 
     false
+}
+
+fn num_possible_arrangements(towels: HashMap<Stripe, Vec<Design>>, design: Design) -> u64 {
+    fn dfs(
+        towels: HashMap<Stripe, Vec<Design>>,
+        design: Design,
+        memo: &mut HashMap<Design, u64>,
+    ) -> u64 {
+        if let Some(&num_paths) = memo.get(&design) {
+            return num_paths;
+        }
+        if design.is_empty() {
+            return 1;
+        }
+
+        let mut total_paths = 0;
+        if let Some(possible_next_towels) = towels.get(design.last().unwrap()) {
+            for possible_next_towel in possible_next_towels.iter() {
+                if let Some(next_remaining_design) =
+                    possible_remaining_design(design.clone(), possible_next_towel.clone())
+                {
+                    total_paths += dfs(towels.clone(), next_remaining_design, memo);
+                }
+            }
+        }
+        memo.insert(design, total_paths);
+        total_paths
+    }
+
+    let mut memo = HashMap::new();
+
+    dfs(towels, design, &mut memo)
 }
 
 pub fn run() -> Result<(), Error> {
@@ -159,7 +202,19 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 19...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day19_input.txt")?;
+
+    let (towels_str, design_str) = input_data.split_once("\n\n").unwrap();
+    let towels = parse_towels(towels_str);
+    let designs: Vec<Design> = parse_designs(design_str);
+
+    let mut sum_num_possible_arrangements: u64 = 0;
+    for design in designs.iter() {
+        if is_design_possible(towels.clone(), design.to_vec()) {
+            sum_num_possible_arrangements +=
+                num_possible_arrangements(towels.clone(), design.to_vec());
+        }
+    }
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -167,7 +222,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day19_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 19:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "The sum of all the ways to arrange each design is {}.",
+        sum_num_possible_arrangements
+    )?;
 
     Ok(())
 }
