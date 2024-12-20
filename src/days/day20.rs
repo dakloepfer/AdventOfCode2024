@@ -53,6 +53,12 @@ impl RaceTrack {
                             y: row as i32,
                         });
                     }
+                    'E' => {
+                        unordered_track_locations.insert(Location {
+                            x: col as i32,
+                            y: row as i32,
+                        });
+                    }
                     _ => {}
                 }
             }
@@ -94,7 +100,7 @@ impl RaceTrack {
         RaceTrack { track_locations }
     }
 
-    fn num_acceptable_shortcuts(&self, min_saving: u32) -> u32 {
+    fn num_acceptable_shortcuts(&self, min_saving: u32, max_cheat: u32) -> u32 {
         let mut num_acceptable_shortcuts = 0;
 
         for (shortcut_start_idx, &shortcut_start_location) in
@@ -103,10 +109,16 @@ impl RaceTrack {
             for (shortcut_end_idx, &shortcut_end_location) in
                 self.track_locations.iter().enumerate()
             {
-                if shortcut_end_idx < shortcut_start_idx + min_saving as usize + 2 {
+                if shortcut_end_idx < shortcut_start_idx + min_saving as usize {
                     continue;
                 }
-                if (shortcut_end_location - shortcut_start_location).magnitude() == 2 {
+                let shortcut_distance =
+                    (shortcut_end_location - shortcut_start_location).magnitude();
+
+                if (shortcut_distance <= max_cheat as i32)
+                    && (shortcut_end_idx as i32 - shortcut_start_idx as i32 - shortcut_distance
+                        >= min_saving as i32)
+                {
                     num_acceptable_shortcuts += 1;
                 }
             }
@@ -131,7 +143,7 @@ fn task1() -> Result<(), Error> {
     let input_data = fs::read_to_string("input_data/day20_input.txt")?;
 
     let racetrack = RaceTrack::from_str(&input_data);
-    let num_acceptable_shortcuts = racetrack.num_acceptable_shortcuts(100);
+    let num_acceptable_shortcuts = racetrack.num_acceptable_shortcuts(100, 2);
 
     let mut solution_file = fs::File::create("solutions/day20_solution.txt")?;
     writeln!(solution_file, "Solution for Task 1 of Day 20:")?;
@@ -147,7 +159,10 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 20...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day20_input.txt")?;
+
+    let racetrack = RaceTrack::from_str(&input_data);
+    let num_acceptable_shortcuts = racetrack.num_acceptable_shortcuts(100, 20);
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -155,7 +170,7 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day20_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 20:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(solution_file, "There are {} routes that would save at least 100 picoseconds when cheating at most for 20 picoseconds.", num_acceptable_shortcuts)?;
 
     Ok(())
 }
