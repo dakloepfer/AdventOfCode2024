@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 20:
+There are 1346 routes where cheating once would save at least 100 picoseconds.
+
+Solution for Task 2 of Day 20:
+TODO 0.
