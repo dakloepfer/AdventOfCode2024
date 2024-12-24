@@ -1,0 +1,5 @@
+Solution for Task 1 of Day 24:
+The network produces the output number 45923082839246.
+
+Solution for Task 2 of Day 24:
+TODO 0.
