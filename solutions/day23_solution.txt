@@ -2,4 +2,4 @@ Solution for Task 1 of Day 23:
 There are 1238 triangles in the network that contain a node starting with 't'.
 
 Solution for Task 2 of Day 23:
-TODO 0.
+The elements of the max clique in the network (and hence the password) are bg,bl,ch,fn,fv,gd,jn,kk,lk,pv,rr,tb,vw.
