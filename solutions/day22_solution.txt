@@ -2,4 +2,4 @@ Solution for Task 1 of Day 22:
 The sum of all the secret numbers after 2000 steps is 19822877190.
 
 Solution for Task 2 of Day 22:
-TODO 0.
+The maximum number of bananas buyable through your agent is 2277.

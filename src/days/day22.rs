@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::io::Error;
 use std::io::Write;
@@ -62,7 +63,39 @@ fn task1() -> Result<(), Error> {
 fn task2() -> Result<(), Error> {
     println!("Computing solution for task 2 of Day 22...");
 
-    let solution = 0; // TODO
+    let input_data = fs::read_to_string("input_data/day22_input.txt")?;
+
+    let mut bananas_at_changes: HashMap<VecDeque<i32>, u32> = HashMap::new();
+    for line in input_data.lines() {
+        let mut secret_number = line.trim().parse::<u32>().ok().unwrap();
+
+        let mut previous_four_changes = VecDeque::new();
+        let mut previous_price = secret_number % 10;
+        let mut already_seen_changes = HashSet::new();
+        for _ in 0..2000 {
+            secret_number = compute_next_number(secret_number);
+            let price = secret_number % 10;
+            previous_four_changes.push_back(price as i32 - previous_price as i32);
+            if previous_four_changes.len() == 5 {
+                previous_four_changes.pop_front();
+            }
+            if previous_four_changes.len() == 4
+                && !already_seen_changes.contains(&previous_four_changes)
+            {
+                *bananas_at_changes
+                    .entry(previous_four_changes.clone())
+                    .or_default() += price;
+                already_seen_changes.insert(previous_four_changes.clone());
+            }
+            previous_price = price;
+        }
+    }
+    let mut max_bananas = 0;
+    for (_changes, num_bananas) in bananas_at_changes {
+        if num_bananas > max_bananas {
+            max_bananas = num_bananas;
+        }
+    }
 
     let mut solution_file = fs::OpenOptions::new()
         .append(true)
@@ -70,7 +103,11 @@ fn task2() -> Result<(), Error> {
         .open("solutions/day22_solution.txt")?;
     writeln!(solution_file)?;
     writeln!(solution_file, "Solution for Task 2 of Day 22:")?;
-    writeln!(solution_file, "TODO {}.", solution)?;
+    writeln!(
+        solution_file,
+        "The maximum number of bananas buyable through your agent is {}.",
+        max_bananas
+    )?;
 
     Ok(())
 }
