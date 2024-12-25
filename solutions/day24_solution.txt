@@ -2,4 +2,4 @@ Solution for Task 1 of Day 24:
 The network produces the output number 45923082839246.
 
 Solution for Task 2 of Day 24:
-TODO 0.
+The output wires that were swapped are jgb,rkf,rrs,rvc,vcg,z09,z20,z24.
