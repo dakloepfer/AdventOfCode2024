@@ -2,4 +2,4 @@ Solution for Task 1 of Day 25:
 There are 3320 lock/key pairs where no columns overlap.
 
 Solution for Task 2 of Day 25:
-TODO 0.
+The chronicle has been successfully completed.
